@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AMS Pro – Athlete Monitoring System</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg0:#080d18;--bg1:#0f1623;--bg2:#16202f;--bg3:#1c2a3d;
+  --border:#1e3a5f;--borderL:#243650;
+  --blue:#3b82f6;--cyan:#06b6d4;--green:#10b981;
+  --yellow:#f59e0b;--red:#ef4444;--purple:#8b5cf6;
+  --txt:#f1f5f9;--txt2:#94a3b8;--txt3:#475569;
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg0);color:var(--txt);min-height:100vh}
+button,input,select,textarea{font-family:inherit}
+input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+.app{display:flex;min-height:100vh;flex-direction:column}
+.topbar{background:var(--bg1);border-bottom:1px solid var(--border);padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--blue),var(--cyan));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:0 0 14px #3b82f660}
+.logo-text{font-size:15px;font-weight:800}
+.logo-sub{font-size:10px;color:var(--txt3)}
+.nav{display:flex;gap:2px}
+.nav-btn{padding:6px 13px;border-radius:7px;font-size:12px;font-weight:600;border:none;background:transparent;color:var(--txt3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+.nav-btn.active{background:rgba(59,130,246,.15);color:var(--blue);border-bottom-color:var(--blue)}
+.nav-btn:hover:not(.active){color:var(--txt2);background:rgba(255,255,255,.04)}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.live-dot{background:rgba(16,185,129,.15);color:var(--green);border:1px solid rgba(16,185,129,.3);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--blue));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.content{flex:1;padding:24px;overflow:auto}
+.page{display:none}.page.active{display:block}
+.page-title{font-size:20px;font-weight:800;margin-bottom:2px}
+.page-sub{font-size:12px;color:var(--txt3);margin-bottom:20px}
+.card{background:var(--bg2);border:1px solid var(--borderL);border-radius:14px;overflow:hidden;margin-bottom:18px}
+.card-header{padding:13px 18px;border-bottom:1px solid var(--borderL);display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:13px;font-weight:700}
+.card-body{padding:18px}
+.badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.b-blue{background:rgba(59,130,246,.15);color:var(--blue);border:1px solid rgba(59,130,246,.3)}
+.b-green{background:rgba(16,185,129,.15);color:var(--green);border:1px solid rgba(16,185,129,.3)}
+.b-yellow{background:rgba(245,158,11,.15);color:var(--yellow);border:1px solid rgba(245,158,11,.3)}
+.b-red{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+.b-purple{background:rgba(139,92,246,.15);color:var(--purple);border:1px solid rgba(139,92,246,.3)}
+.b-cyan{background:rgba(6,182,212,.15);color:var(--cyan);border:1px solid rgba(6,182,212,.3)}
+.b-gray{background:rgba(100,116,139,.15);color:var(--txt2);border:1px solid rgba(100,116,139,.3)}
+.btn{padding:7px 16px;border-radius:8px;font-size:13px;font-weight:600;border:none;cursor:pointer;transition:all .15s}
+.btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:#2563eb}
+.btn-ghost{background:transparent;color:var(--txt2);border:1px solid var(--borderL)}.btn-ghost:hover{background:var(--bg3)}
+.btn-success{background:rgba(16,185,129,.12);color:var(--green);border:1px solid rgba(16,185,129,.3);padding:5px 13px;font-size:12px}
+.form-group{display:flex;flex-direction:column;gap:4px}
+.form-label{font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em}
+.form-control{background:var(--bg3);border:1px solid var(--borderL);border-radius:8px;padding:7px 11px;color:var(--txt);font-size:13px;outline:none;width:100%;transition:border-color .15s}
+.form-control:focus{border-color:var(--blue)}
+.form-control option{background:var(--bg2)}
+.form-row{display:grid;gap:12px}
+.c2{grid-template-columns:1fr 1fr}
+.c3{grid-template-columns:1fr 1fr 1fr}
+.c4{grid-template-columns:1fr 1fr 1fr 1fr}
+.c5{grid-template-columns:1fr 1fr 1fr 1fr 1fr}
+.bar-wrap{height:6px;background:var(--bg0);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;transition:width .5s}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{text-align:left;font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.04em;padding:8px 12px;border-bottom:1px solid var(--borderL);white-space:nowrap;background:var(--bg3)}
+tbody td{padding:9px 12px;border-bottom:1px solid rgba(30,58,95,.22);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:rgba(59,130,246,.03)}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.kpi-card{background:var(--bg2);border:1px solid var(--borderL);border-radius:14px;padding:18px;position:relative;overflow:hidden}
+.kpi-top{position:absolute;top:0;left:0;right:0;height:3px}
+.kpi-icon{font-size:20px;margin-bottom:8px}
+.kpi-val{font-size:28px;font-weight:800;line-height:1;margin-bottom:3px}
+.kpi-label{font-size:12px;color:var(--txt2);font-weight:600}
+.kpi-sub{font-size:10px;color:var(--txt3);margin-top:3px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.g31{display:grid;grid-template-columns:2fr 1fr;gap:16px}
+.g6{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.chart-bars{display:flex;align-items:flex-end;gap:5px}
+.chart-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.chart-bar-area{flex:1;width:100%;display:flex;align-items:flex-end;gap:2px}
+.chart-bar{border-radius:3px 3px 0 0;min-height:3px;width:100%}
+.chart-lbl{font-size:9px;color:var(--txt3)}
+.ex-header{display:grid;grid-template-columns:2fr 1fr 1fr 1.2fr 1fr 32px;gap:7px;padding:0 10px 5px;font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.04em}
+.ex-row{display:grid;grid-template-columns:2fr 1fr 1fr 1.2fr 1fr 32px;gap:7px;align-items:center;padding:9px 10px;background:var(--bg3);border-radius:9px;border:1px solid var(--borderL);margin-bottom:7px}
+.squad-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;padding:18px}
+.squad-card{background:var(--bg3);border:1px solid var(--borderL);border-radius:11px;padding:14px;position:relative}
+.squad-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;margin-bottom:8px}
+.remove-btn{position:absolute;top:9px;right:9px;background:transparent;border:none;color:var(--txt3);cursor:pointer;font-size:13px}
+.remove-btn:hover{color:var(--red)}
+.filter-tabs{display:flex;gap:3px;flex-wrap:wrap}
+.ftab{padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--txt3)}
+.ftab.active{background:rgba(59,130,246,.18);color:var(--blue)}
+.metric-card{background:var(--bg2);border:1px solid var(--borderL);border-radius:11px;padding:14px;text-align:center}
+.metric-val{font-size:20px;font-weight:800;line-height:1;margin-bottom:3px}
+.metric-label{font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em}
+.metric-sub{font-size:9px;color:var(--txt3);margin-top:2px}
+.sec-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin:12px 0 10px}
+.ath-chip{display:flex;align-items:center;gap:7px}
+.ath-av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800}
+.empty{padding:32px;text-align:center;color:var(--txt3);font-size:12px}
+.empty-icon{font-size:30px;margin-bottom:8px}
+.toast{position:fixed;bottom:22px;right:22px;padding:10px 18px;border-radius:10px;font-size:12px;font-weight:600;box-shadow:0 6px 24px rgba(0,0,0,.4);z-index:9999;display:none;align-items:center;gap:7px}
+.toast.show{display:flex}
+.toast.success{background:rgba(16,185,129,.95);color:#fff}
+.toast.error{background:rgba(239,68,68,.95);color:#fff}
+.divider{border:none;border-top:1px solid var(--borderL);margin:14px 0}
+@media(max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.g2,.g31{grid-template-columns:1fr}.g6{grid-template-columns:repeat(3,1fr)}.c4{grid-template-columns:1fr 1fr}.c5{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="topbar">
+  <div class="logo">
+    <div class="logo-icon">⚡</div>
+    <div><div class="logo-text">AMS Pro</div><div class="logo-sub">Athlete Monitoring System</div></div>
+  </div>
+  <nav class="nav">
+    <button class="nav-btn active" onclick="showPage('dashboard',this)">📊 Dashboard</button>
+    <button class="nav-btn" onclick="showPage('gps',this)">🛰 GPS Log</button>
+    <button class="nav-btn" onclick="showPage('gym',this)">🏋️ Gym Log</button>
+    <button class="nav-btn" onclick="showPage('squad',this)">👥 Squad</button>
+    <button class="nav-btn" onclick="showPage('analytics',this)">📈 Analytics</button>
+  </nav>
+  <div class="topbar-right">
+    <div class="live-dot">🟢 Live</div>
+    <div class="avatar">DR</div>
+  </div>
+</header>
+<div class="content">
+
+<!-- DASHBOARD -->
+<div id="page-dashboard" class="page active">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px">
+    <div><div class="page-title">Dashboard</div><div id="dash-date" style="font-size:12px;color:var(--txt3)"></div></div>
+    <span class="badge b-blue" id="dash-squad-badge">Squad: 0</span>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi-card"><div class="kpi-top" style="background:linear-gradient(90deg,var(--blue),var(--cyan))"></div><div class="kpi-icon">👥</div><div class="kpi-val" style="color:var(--blue)" id="kpi-ath">0</div><div class="kpi-label">Total Athletes</div><div class="kpi-sub">in squad</div></div>
+    <div class="kpi-card"><div class="kpi-top" style="background:linear-gradient(90deg,var(--cyan),var(--blue))"></div><div class="kpi-icon">🛰</div><div class="kpi-val" style="color:var(--cyan)" id="kpi-gps">0</div><div class="kpi-label">GPS Sessions Today</div><div class="kpi-sub" id="kpi-gps-sub">avg — km</div></div>
+    <div class="kpi-card"><div class="kpi-top" style="background:linear-gradient(90deg,var(--purple),var(--blue))"></div><div class="kpi-icon">🏋️</div><div class="kpi-val" style="color:var(--purple)" id="kpi-gym">0</div><div class="kpi-label">Gym Sessions Today</div><div class="kpi-sub" id="kpi-gym-sub">avg — kg vol</div></div>
+    <div class="kpi-card"><div class="kpi-top" style="background:linear-gradient(90deg,var(--green),var(--cyan))"></div><div class="kpi-icon">📋</div><div class="kpi-val" style="color:var(--green)" id="kpi-total">0</div><div class="kpi-label">Total Sessions</div><div class="kpi-sub">all time</div></div>
+  </div>
+  <div class="g31" style="margin-bottom:0">
+    <div class="card" style="margin-bottom:0">
+      <div class="card-header"><div class="card-title">🛰 Recent GPS Sessions</div><span class="badge b-blue" id="d-gps-cnt">0 total</span></div>
+      <div class="table-wrap"><table><thead><tr><th>Date</th><th>Athlete</th><th>Type</th><th>Distance</th><th>Top Speed</th><th>Sprints</th><th>HSR</th><th>Z4/Z5</th></tr></thead><tbody id="d-gps-tbody"><tr><td colspan="8" class="empty"><div class="empty-icon">🛰</div>No GPS sessions yet</td></tr></tbody></table></div>
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="card-header"><div class="card-title">📈 7-Day Avg Distance</div><span style="font-size:10px;color:var(--txt3)">km</span></div>
+      <div class="card-body">
+        <div class="chart-bars" id="d-dist-chart" style="height:100px;margin-bottom:8px"></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--txt3)"><span>Avg: <b style="color:var(--cyan)" id="d-avg-dist">—</b></span><span>Peak: <b style="color:var(--yellow)" id="d-peak-dist">—</b></span></div>
+        <hr class="divider">
+        <div style="font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Position Split</div>
+        <div id="d-pos-split"></div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:18px">
+    <div class="card-header"><div class="card-title">🏋️ Recent Gym Sessions</div><span class="badge b-purple" id="d-gym-cnt">0 total</span></div>
+    <div class="table-wrap"><table><thead><tr><th>Date</th><th>Athlete</th><th>Type</th><th>Exercises</th><th>Volume</th><th>RPE</th><th>Readiness</th></tr></thead><tbody id="d-gym-tbody"><tr><td colspan="7" class="empty"><div class="empty-icon">🏋️</div>No gym sessions yet</td></tr></tbody></table></div>
+  </div>
+</div>
+
+<!-- GPS LOG -->
+<div id="page-gps" class="page">
+  <div class="page-title">🛰 GPS Session Log</div>
+  <div class="page-sub">Enter full GPS data per athlete per session</div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">📝 Enter GPS Data</div><span class="badge b-cyan">Full GPS</span></div>
+    <div class="card-body">
+      <div class="form-row c4" style="margin-bottom:12px">
+        <div class="form-group"><label class="form-label">Date</label><input type="date" id="gps-date" class="form-control"></div>
+        <div class="form-group"><label class="form-label">Athlete</label><select id="gps-athlete" class="form-control"><option value="">— Select —</option></select></div>
+        <div class="form-group"><label class="form-label">Session Type</label><select id="gps-type" class="form-control"><option>Training</option><option>Match</option><option>Friendly</option><option>Recovery</option><option>Pre-season</option><option>Conditioning</option></select></div>
+        <div class="form-group"><label class="form-label">Duration (min)</label><input type="number" id="gps-dur" class="form-control" placeholder="90" min="0"></div>
+      </div>
+      <div class="sec-label" style="color:var(--cyan)">📍 Distance & Speed</div>
+      <div class="form-row c4" style="margin-bottom:12px">
+        <div class="form-group"><label class="form-label">Total Distance (km)</label><input type="number" id="gps-dist" class="form-control" placeholder="10.5" step="0.01" min="0"></div>
+        <div class="form-group"><label class="form-label">Top Speed (km/h)</label><input type="number" id="gps-spd" class="form-control" placeholder="32.4" step="0.1" min="0"></div>
+        <div class="form-group"><label class="form-label">High-Speed Running (m)</label><input type="number" id="gps-hsr" class="form-control" placeholder="850" min="0"></div>
+        <div class="form-group"><label class="form-label">Sprint Count (#)</label><input type="number" id="gps-spr" class="form-control" placeholder="12" min="0"></div>
+      </div>
+      <div class="sec-label" style="color:var(--yellow)">⚡ Accelerations & Decelerations</div>
+      <div class="form-row c4" style="margin-bottom:12px">
+        <div class="form-group"><label class="form-label">Accelerations (#)</label><input type="number" id="gps-acc" class="form-control" placeholder="45" min="0"></div>
+        <div class="form-group"><label class="form-label">Decelerations (#)</label><input type="number" id="gps-dec" class="form-control" placeholder="40" min="0"></div>
+        <div class="form-group"><label class="form-label">RPE (1–10)</label><input type="number" id="gps-rpe" class="form-control" placeholder="7" min="1" max="10"></div>
+        <div class="form-group"><label class="form-label">Notes</label><input type="text" id="gps-notes" class="form-control" placeholder="Optional…"></div>
+      </div>
+      <div class="sec-label" style="color:var(--red)">❤️ Heart Rate Zones (% time)</div>
+      <div class="form-row c5" style="margin-bottom:14px">
+        <div class="form-group"><label class="form-label">Z1 &lt;60%</label><input type="number" id="gps-z1" class="form-control" placeholder="0" min="0" max="100" oninput="updBar('z1',this.value)"><div class="bar-wrap" style="margin-top:4px"><div class="bar-fill" id="bar-z1" style="background:var(--blue);width:0%"></div></div></div>
+        <div class="form-group"><label class="form-label">Z2 60–70%</label><input type="number" id="gps-z2" class="form-control" placeholder="0" min="0" max="100" oninput="updBar('z2',this.value)"><div class="bar-wrap" style="margin-top:4px"><div class="bar-fill" id="bar-z2" style="background:var(--cyan);width:0%"></div></div></div>
+        <div class="form-group"><label class="form-label">Z3 70–80%</label><input type="number" id="gps-z3" class="form-control" placeholder="0" min="0" max="100" oninput="updBar('z3',this.value)"><div class="bar-wrap" style="margin-top:4px"><div class="bar-fill" id="bar-z3" style="background:var(--green);width:0%"></div></div></div>
+        <div class="form-group"><label class="form-label">Z4 80–90%</label><input type="number" id="gps-z4" class="form-control" placeholder="0" min="0" max="100" oninput="updBar('z4',this.value)"><div class="bar-wrap" style="margin-top:4px"><div class="bar-fill" id="bar-z4" style="background:var(--yellow);width:0%"></div></div></div>
+        <div class="form-group"><label class="form-label">Z5 &gt;90%</label><input type="number" id="gps-z5" class="form-control" placeholder="0" min="0" max="100" oninput="updBar('z5',this.value)"><div class="bar-wrap" style="margin-top:4px"><div class="bar-fill" id="bar-z5" style="background:var(--red);width:0%"></div></div></div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:14px;border-top:1px solid var(--borderL)">
+        <button class="btn btn-ghost" onclick="clearGPS()">Clear</button>
+        <button class="btn btn-primary" onclick="saveGPS()">💾 Save GPS Session</button>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:0">
+    <div class="card-header">
+      <div class="card-title" id="gps-log-title">📋 GPS Log (0)</div>
+      <div style="display:flex;gap:7px;align-items:center">
+        <input type="text" id="gps-search" class="form-control" placeholder="Search…" style="width:130px;padding:4px 9px;font-size:11px" oninput="renderGPSLog()">
+        <div class="filter-tabs"><button class="ftab active" onclick="setGF('All',this)">All</button><button class="ftab" onclick="setGF('GK',this)">GK</button><button class="ftab" onclick="setGF('DF',this)">DF</button><button class="ftab" onclick="setGF('MF',this)">MF</button><button class="ftab" onclick="setGF('FW',this)">FW</button></div>
+      </div>
+    </div>
+    <div class="table-wrap"><table><thead><tr><th>Date</th><th>Athlete</th><th>Type</th><th>Dur</th><th>Distance</th><th>Top Spd</th><th>HSR</th><th>Sprints</th><th>Acc</th><th>Dec</th><th>Z4</th><th>Z5</th><th>RPE</th><th>Notes</th></tr></thead><tbody id="gps-tbody"><tr><td colspan="14" class="empty"><div class="empty-icon">🛰</div>No sessions yet</td></tr></tbody></table></div>
+  </div>
+</div>
+
+<!-- GYM LOG -->
+<div id="page-gym" class="page">
+  <div class="page-title">🏋️ Gym Session Log</div>
+  <div class="page-sub">Log exercises, sets, reps and weight per session</div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">📝 Enter Gym Session</div><span class="badge b-purple" id="gym-vol-badge" style="display:none"></span></div>
+    <div class="card-body">
+      <div class="form-row c4" style="margin-bottom:12px">
+        <div class="form-group"><label class="form-label">Date</label><input type="date" id="gym-date" class="form-control"></div>
+        <div class="form-group"><label class="form-label">Athlete</label><select id="gym-athlete" class="form-control"><option value="">— Select —</option></select></div>
+        <div class="form-group"><label class="form-label">Session Type</label><select id="gym-type" class="form-control"><option>Strength</option><option>Power</option><option>Hypertrophy</option><option>Endurance</option><option>Rehabilitation</option><option>Activation</option><option>Testing</option></select></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div class="form-group"><label class="form-label">RPE (1–10)</label><input type="number" id="gym-rpe" class="form-control" placeholder="7" min="1" max="10"></div>
+          <div class="form-group"><label class="form-label">Readiness</label><input type="number" id="gym-read" class="form-control" placeholder="8" min="1" max="10"></div>
+        </div>
+      </div>
+      <div class="sec-label" style="color:var(--purple)">🏋️ Exercises</div>
+      <div class="ex-header"><div>Exercise</div><div>Sets</div><div>Reps</div><div>Weight (kg)</div><div>Volume</div><div></div></div>
+      <div id="gym-ex-list"></div>
+      <button class="btn btn-success" onclick="addEx()">+ Add Exercise</button>
+      <div class="form-group" style="margin-top:12px"><label class="form-label">Session Notes</label><input type="text" id="gym-notes" class="form-control" placeholder="Observations, feedback, flags…"></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:14px;border-top:1px solid var(--borderL);margin-top:14px">
+        <button class="btn btn-ghost" onclick="clearGym()">Clear</button>
+        <button class="btn btn-primary" onclick="saveGym()">💾 Save Gym Session</button>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:0">
+    <div class="card-header">
+      <div class="card-title" id="gym-log-title">📋 Gym Log (0)</div>
+      <input type="text" id="gym-search" class="form-control" placeholder="Search…" style="width:140px;padding:4px 9px;font-size:11px" oninput="renderGymLog()">
+    </div>
+    <div class="table-wrap"><table><thead><tr><th>Date</th><th>Athlete</th><th>Type</th><th>Exercises</th><th>Volume</th><th>RPE</th><th>Readiness</th><th>Notes</th></tr></thead><tbody id="gym-tbody"><tr><td colspan="8" class="empty"><div class="empty-icon">🏋️</div>No sessions yet</td></tr></tbody></table></div>
+  </div>
+</div>
+
+<!-- SQUAD -->
+<div id="page-squad" class="page">
+  <div class="page-title">👥 Squad Manager</div>
+  <div class="page-sub">Add, view and remove athletes from your roster</div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">➕ Add Athlete</div><span class="badge b-blue" id="sq-cnt-badge">0 / 50</span></div>
+    <div class="card-body">
+      <div class="form-row c4" style="align-items:flex-end">
+        <div class="form-group"><label class="form-label">Full Name</label><input type="text" id="sq-name" class="form-control" placeholder="e.g. John Smith"></div>
+        <div class="form-group"><label class="form-label">Position</label><select id="sq-pos" class="form-control"><option>GK</option><option selected>DF</option><option>MF</option><option>FW</option></select></div>
+        <div class="form-group"><label class="form-label">Squad No.</label><input type="number" id="sq-num" class="form-control" placeholder="10" min="1"></div>
+        <button class="btn btn-primary" onclick="addAthlete()">+ Add to Squad</button>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:0">
+    <div class="card-header">
+      <div class="card-title" id="sq-title">Squad (0)</div>
+      <div style="display:flex;gap:7px">
+        <input type="text" id="sq-search" class="form-control" placeholder="Search…" style="width:130px;padding:4px 9px;font-size:11px" oninput="renderSquad()">
+        <div class="filter-tabs"><button class="ftab active" onclick="setSqF('All',this)">All</button><button class="ftab" onclick="setSqF('GK',this)">GK</button><button class="ftab" onclick="setSqF('DF',this)">DF</button><button class="ftab" onclick="setSqF('MF',this)">MF</button><button class="ftab" onclick="setSqF('FW',this)">FW</button></div>
+      </div>
+    </div>
+    <div class="squad-grid" id="sq-grid"><div class="empty"><div class="empty-icon">👥</div>No athletes yet</div></div>
+  </div>
+</div>
+
+<!-- ANALYTICS -->
+<div id="page-analytics" class="page">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+    <div><div class="page-title">📈 Analytics</div><div class="page-sub" style="margin-bottom:0">Performance trends and squad comparisons</div></div>
+    <select id="an-ath" class="form-control" style="width:240px" onchange="renderAnalytics()"><option value="">All Athletes (Squad Avg)</option></select>
+  </div>
+  <div class="sec-label" style="color:var(--cyan)">🛰 GPS Performance Summary</div>
+  <div class="g6" style="margin-bottom:18px">
+    <div class="metric-card"><div class="metric-val" style="color:var(--cyan)" id="an-avg-d">—</div><div class="metric-label">Avg Distance</div><div class="metric-sub">km</div></div>
+    <div class="metric-card"><div class="metric-val" style="color:var(--blue)" id="an-max-d">—</div><div class="metric-label">Max Distance</div><div class="metric-sub">km</div></div>
+    <div class="metric-card"><div class="metric-val" style="color:var(--yellow)" id="an-avg-s">—</div><div class="metric-label">Avg Top Speed</div><div class="metric-sub">km/h</div></div>
+    <div class="metric-card"><div class="metric-val" style="color:var(--red)" id="an-max-s">—</div><div class="metric-label">Max Top Speed</div><div class="metric-sub">km/h</div></div>
+    <div class="metric-card"><div class="metric-val" style="color:var(--purple)" id="an-avg-sp">—</div><div class="metric-label">Avg Sprints</div><div class="metric-sub">per session</div></div>
+    <div class="metric-card"><div class="metric-val" style="color:var(--green)" id="an-avg-h">—</div><div class="metric-label">Avg HSR</div><div class="metric-sub">metres</div></div>
+  </div>
+  <div class="g2" style="margin-bottom:18px">
+    <div class="card" style="margin-bottom:0"><div class="card-header"><div class="card-title">❤️ Avg HR Zone Distribution</div><span class="badge b-red" id="an-gps-cnt">0 sessions</span></div><div class="card-body" id="an-zones"><div class="empty"><div class="empty-icon">❤️</div>No GPS data yet</div></div></div>
+    <div class="card" style="margin-bottom:0"><div class="card-header"><div class="card-title">🏋️ Gym Volume per Session</div><span class="badge b-purple" id="an-gym-cnt">0 sessions</span></div><div class="card-body"><div class="chart-bars" id="an-gym-chart" style="height:120px"><div class="empty" style="width:100%"><div class="empty-icon">🏋️</div>No gym data yet</div></div><div style="display:flex;gap:16px;font-size:11px;color:var(--txt3);margin-top:8px"><span>Avg: <b style="color:var(--purple)" id="an-gym-avg">—</b></span><span>Peak: <b style="color:var(--yellow)" id="an-gym-pk">—</b></span></div></div></div>
+  </div>
+  <div class="g2" style="margin-bottom:18px">
+    <div class="card" style="margin-bottom:0"><div class="card-header"><div class="card-title">⚡ Accel / Decel Summary</div></div><div class="card-body" id="an-accel"><div class="empty"><div class="empty-icon">⚡</div>No GPS data yet</div></div></div>
+    <div class="card" style="margin-bottom:0"><div class="card-header"><div class="card-title">📊 Avg Distance by Position</div></div><div class="card-body" id="an-pos"><div class="empty"><div class="empty-icon">📊</div>No GPS data yet</div></div></div>
+  </div>
+  <div class="card" style="margin-bottom:0">
+    <div class="card-header"><div class="card-title">🏆 GPS Leaderboard</div><span class="badge b-yellow">All time</span></div>
+    <div class="table-wrap"><table><thead><tr><th>#</th><th>Athlete</th><th>Pos</th><th>Sessions</th><th>Avg Distance</th><th>Avg Top Speed</th><th>Avg Sprints</th><th>Avg HSR</th></tr></thead><tbody id="an-lb"><tr><td colspan="8" class="empty"><div class="empty-icon">🏆</div>No GPS data yet</td></tr></tbody></table></div>
+  </div>
+</div>
+
+</div><!-- /content -->
+</div><!-- /app -->
+<div class="toast" id="toast"></div>
+
+<script>
+const EX_LIST=["Back Squat","Deadlift","Bench Press","Pull-Up","Romanian DL","Hip Thrust","Leg Press","Nordic Curl","Box Jump","Sled Push","Power Clean","Snatch","Lunge","Step-Up","Shoulder Press","Dumbbell Row","Cable Row","Lat Pulldown","Incline Press","Tricep Dip"];
+const PC={GK:"#f59e0b",DF:"#3b82f6",MF:"#10b981",FW:"#ef4444"};
+let GF='All',SQF='All';
+let GYMEX=[];
+
+let DB={
+  athletes:[
+    {id:1,name:"Marcus Johnson",pos:"FW",num:9},{id:2,name:"Luis Garcia",pos:"MF",num:8},
+    {id:3,name:"Tom Williams",pos:"MF",num:6},{id:4,name:"Kevin Davis",pos:"DF",num:4},
+    {id:5,name:"Arjun Patel",pos:"GK",num:1},{id:6,name:"Jonas Müller",pos:"DF",num:5},
+    {id:7,name:"Ryan Chen",pos:"FW",num:11},{id:8,name:"Samuel Okafor",pos:"DF",num:3},
+    {id:9,name:"Pedro Torres",pos:"MF",num:10},{id:10,name:"Bart Kowalski",pos:"FW",num:7},
+    {id:11,name:"Luca Rossi",pos:"MF",num:14},{id:12,name:"Erik Larsson",pos:"DF",num:2},
+    {id:13,name:"Diallo Mbaye",pos:"FW",num:17},{id:14,name:"Jake Henderson",pos:"MF",num:16},
+    {id:15,name:"Carlos Vega",pos:"DF",num:15}
+  ],
+  gpsLogs:[],gymLogs:[]
+};
+
+function saveDB(){try{localStorage.setItem('ams_db2',JSON.stringify(DB));}catch(e){}}
+function loadDB(){try{const d=localStorage.getItem('ams_db2');if(d)DB=JSON.parse(d);}catch(e){}}
+const uid=()=>Math.random().toString(36).slice(2,9);
+const today=()=>new Date().toISOString().slice(0,10);
+const ini=n=>n.split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2);
+const fn=(v,d=1)=>(isNaN(v)||v===null||v==='')?'—':Number(v).toFixed(d);
+const avg=(a,k)=>a.length?a.reduce((s,g)=>s+Number(g[k]||0),0)/a.length:null;
+const peak=(a,k)=>a.length?Math.max(...a.map(g=>Number(g[k]||0))):null;
+const pc=p=>PC[p]||'#3b82f6';
+const rpc=r=>!r?'var(--txt3)':r>=8?'var(--red)':r>=6?'var(--yellow)':'var(--green)';
+
+function toast(msg,type='success'){
+  const t=document.getElementById('toast');
+  t.className='toast show '+type;
+  t.innerHTML=(type==='success'?'✅ ':'❌ ')+msg;
+  clearTimeout(window._tt);
+  window._tt=setTimeout(()=>{t.className='toast';},2600);
+}
+
+function chip(name,pos){
+  const c=pc(pos);
+  return `<div class="ath-chip"><div class="ath-av" style="background:${c}22;color:${c}">${ini(name)}</div><div><div style="font-weight:700;font-size:12px">${name}</div><div style="font-size:10px;color:${c}">${pos}</div></div></div>`;
+}
+
+function posBadge(pos){
+  const c=pc(pos);
+  return `<span style="background:${c}22;color:${c};border:1px solid ${c}44;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700">${pos}</span>`;
+}
+
+function showPage(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(btn)btn.classList.add('active');
+  if(id==='dashboard')renderDash();
+  if(id==='analytics')renderAnalytics();
+}
+
+function refreshDropdowns(){
+  const s=[...DB.athletes].sort((a,b)=>a.name.localeCompare(b.name));
+  const opts='<option value="">— Select Athlete —</option>'+s.map(a=>`<option value="${a.id}">#${a.num} ${a.name} (${a.pos})</option>`).join('');
+  document.getElementById('gps-athlete').innerHTML=opts;
+  document.getElementById('gym-athlete').innerHTML=opts;
+  let aOpts='<option value="">All Athletes (Squad Avg)</option>'+s.map(a=>`<option value="${a.id}">${a.name}</option>`).join('');
+  document.getElementById('an-ath').innerHTML=aOpts;
+}
+
+// DASHBOARD
+function renderDash(){
+  const td=today();
+  const gT=DB.gpsLogs.filter(g=>g.date===td);
+  const gyT=DB.gymLogs.filter(g=>g.date===td);
+  document.getElementById('dash-date').textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('dash-squad-badge').textContent='Squad: '+DB.athletes.length;
+  document.getElementById('kpi-ath').textContent=DB.athletes.length;
+  document.getElementById('kpi-gps').textContent=gT.length;
+  document.getElementById('kpi-gym').textContent=gyT.length;
+  document.getElementById('kpi-total').textContent=DB.gpsLogs.length+DB.gymLogs.length;
+  const ad=gT.length?(gT.reduce((s,g)=>s+Number(g.dist||0),0)/gT.length).toFixed(1):'—';
+  document.getElementById('kpi-gps-sub').textContent='avg '+ad+' km';
+  const av=gyT.length?Math.round(gyT.reduce((s,g)=>s+sVol(g),0)/gyT.length):'—';
+  document.getElementById('kpi-gym-sub').textContent='avg '+av+' kg vol';
+  document.getElementById('d-gps-cnt').textContent=DB.gpsLogs.length+' total';
+  document.getElementById('d-gym-cnt').textContent=DB.gymLogs.length+' total';
+
+  const r6=[...DB.gpsLogs].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,6);
+  const gt=document.getElementById('d-gps-tbody');
+  gt.innerHTML=r6.length?r6.map(g=>`<tr><td style="color:var(--txt3);font-size:11px">${g.date}</td><td>${chip(g.athName,g.pos)}</td><td><span class="badge b-blue">${g.type}</span></td><td style="font-weight:700;color:var(--cyan)">${g.dist||'—'} km</td><td style="font-weight:700;color:var(--yellow)">${g.spd||'—'} km/h</td><td style="font-weight:700;color:var(--red)">${g.spr||'—'}</td><td style="font-weight:700;color:var(--purple)">${g.hsr||'—'} m</td><td style="font-size:11px;color:var(--txt2)">${g.z4||'—'}%/${g.z5||'—'}%</td></tr>`).join(''):'<tr><td colspan="8" class="empty"><div class="empty-icon">🛰</div>No GPS sessions yet</td></tr>';
+
+  const rgy=[...DB.gymLogs].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,6);
+  const gyt=document.getElementById('d-gym-tbody');
+  gyt.innerHTML=rgy.length?rgy.map(g=>`<tr><td style="color:var(--txt3);font-size:11px">${g.date}</td><td>${chip(g.athName,g.pos)}</td><td><span class="badge b-purple">${g.type}</span></td><td style="font-size:11px;color:var(--txt2)">${g.exercises.length} exercise${g.exercises.length!==1?'s':''}</td><td style="font-weight:700;color:var(--purple)">${sVol(g).toLocaleString()} kg</td><td style="font-weight:700;color:${rpc(g.rpe)}">${g.rpe||'—'}/10</td><td style="font-weight:700;color:${g.read>=7?'var(--green)':g.read>=5?'var(--yellow)':'var(--red)'}">${g.read||'—'}/10</td></tr>`).join(''):'<tr><td colspan="7" class="empty"><div class="empty-icon">🏋️</div>No gym sessions yet</td></tr>';
+
+  const last7=[];
+  for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const ds=d.toISOString().slice(0,10);const rows=DB.gpsLogs.filter(g=>g.date===ds);last7.push({day:['S','M','T','W','T','F','S'][d.getDay()],val:rows.length?rows.reduce((s,g)=>s+Number(g.dist||0),0)/rows.length:0});}
+  const mx=Math.max(...last7.map(x=>x.val),0.1);
+  document.getElementById('d-dist-chart').innerHTML=last7.map(x=>`<div class="chart-col"><div class="chart-bar-area"><div class="chart-bar" style="height:${Math.max((x.val/mx)*100,x.val?3:2)}%;background:${x.val?'linear-gradient(to top,var(--cyan),var(--blue))':'var(--bg3)'}"></div></div><div class="chart-lbl">${x.day}</div></div>`).join('');
+  const nz=last7.filter(x=>x.val>0);
+  document.getElementById('d-avg-dist').textContent=nz.length?(nz.reduce((s,x)=>s+x.val,0)/nz.length).toFixed(1)+' km':'—';
+  document.getElementById('d-peak-dist').textContent=nz.length?Math.max(...nz.map(x=>x.val)).toFixed(1)+' km':'—';
+
+  document.getElementById('d-pos-split').innerHTML=['GK','DF','MF','FW'].map(p=>{const cnt=DB.athletes.filter(a=>a.pos===p).length;const pct=DB.athletes.length?(cnt/DB.athletes.length)*100:0;return `<div style="margin-bottom:7px"><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px"><span style="color:${pc(p)};font-weight:700">${p}</span><span style="color:var(--txt2)">${cnt}</span></div><div class="bar-wrap"><div class="bar-fill" style="width:${pct}%;background:${pc(p)}"></div></div></div>`;}).join('');
+}
+
+// GPS
+function updBar(z,v){const b=document.getElementById('bar-'+z);if(b)b.style.width=Math.min(100,Math.max(0,v||0))+'%';}
+
+function saveGPS(){
+  const aid=document.getElementById('gps-athlete').value;
+  const ath=DB.athletes.find(a=>a.id==aid);
+  if(!ath){toast('Select an athlete','error');return;}
+  const dist=document.getElementById('gps-dist').value;
+  if(!dist){toast('Enter distance','error');return;}
+  DB.gpsLogs.push({
+    id:uid(),date:document.getElementById('gps-date').value||today(),
+    athId:ath.id,athName:ath.name,pos:ath.pos,
+    type:document.getElementById('gps-type').value,
+    dur:document.getElementById('gps-dur').value,
+    dist,spd:document.getElementById('gps-spd').value,
+    hsr:document.getElementById('gps-hsr').value,spr:document.getElementById('gps-spr').value,
+    acc:document.getElementById('gps-acc').value,dec:document.getElementById('gps-dec').value,
+    rpe:document.getElementById('gps-rpe').value,
+    z1:document.getElementById('gps-z1').value,z2:document.getElementById('gps-z2').value,
+    z3:document.getElementById('gps-z3').value,z4:document.getElementById('gps-z4').value,
+    z5:document.getElementById('gps-z5').value,
+    notes:document.getElementById('gps-notes').value
+  });
+  saveDB();toast('GPS session saved for '+ath.name);clearGPS();renderGPSLog();
+}
+
+function clearGPS(){
+  ['dist','spd','hsr','spr','acc','dec','rpe','z1','z2','z3','z4','z5','notes','dur'].forEach(f=>{const e=document.getElementById('gps-'+f);if(e)e.value='';});
+  ['z1','z2','z3','z4','z5'].forEach(z=>{const b=document.getElementById('bar-'+z);if(b)b.style.width='0%';});
+  document.getElementById('gps-date').value=today();
+}
+
+function setGF(f,btn){GF=f;document.querySelectorAll('#page-gps .ftab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderGPSLog();}
+
+function renderGPSLog(){
+  const s=(document.getElementById('gps-search').value||'').toLowerCase();
+  const logs=[...DB.gpsLogs].filter(g=>GF==='All'||g.pos===GF).filter(g=>g.athName.toLowerCase().includes(s)).sort((a,b)=>b.date.localeCompare(a.date));
+  document.getElementById('gps-log-title').textContent='📋 GPS Log ('+DB.gpsLogs.length+')';
+  const tb=document.getElementById('gps-tbody');
+  tb.innerHTML=logs.length?logs.map(g=>`<tr><td style="color:var(--txt3);font-size:11px;white-space:nowrap">${g.date}</td><td>${chip(g.athName,g.pos)}</td><td><span class="badge b-blue">${g.type}</span></td><td style="color:var(--txt2)">${g.dur||'—'}</td><td style="font-weight:700;color:var(--cyan)">${g.dist||'—'} km</td><td style="font-weight:700;color:var(--yellow)">${g.spd||'—'}</td><td style="font-weight:700;color:var(--purple)">${g.hsr||'—'} m</td><td style="font-weight:700;color:var(--red)">${g.spr||'—'}</td><td>${g.acc||'—'}</td><td>${g.dec||'—'}</td><td style="font-weight:700;color:${Number(g.z4)>20?'var(--yellow)':'var(--txt2)'}">${g.z4||'—'}%</td><td style="font-weight:700;color:${Number(g.z5)>10?'var(--red)':'var(--txt2)'}">${g.z5||'—'}%</td><td style="font-weight:700;color:${rpc(g.rpe)}">${g.rpe||'—'}</td><td style="font-size:11px;color:var(--txt2)">${g.notes||'—'}</td></tr>`).join(''):'<tr><td colspan="14" class="empty"><div class="empty-icon">🛰</div>No sessions match filter</td></tr>';
+}
+
+// GYM
+const newEx=()=>({id:uid(),exercise:'Back Squat',sets:'',reps:'',weight:''});
+const exVol=e=>Number(e.sets||0)*Number(e.reps||0)*Number(e.weight||0);
+const sVol=g=>g.exercises.reduce((s,e)=>s+exVol(e),0);
+
+function addEx(){GYMEX.push(newEx());renderEx();}
+function removeEx(id){GYMEX=GYMEX.filter(e=>e.id!==id);renderEx();}
+function setEx(id,f,v){const e=GYMEX.find(x=>x.id===id);if(e){e[f]=v;updExVol(id);updVolBadge();}}
+function updExVol(id){const el=document.getElementById('ev-'+id);const e=GYMEX.find(x=>x.id===id);if(el&&e){const v=exVol(e);el.textContent=v>0?v.toLocaleString()+' kg':'—';}}
+function updVolBadge(){const t=GYMEX.reduce((s,e)=>s+exVol(e),0);const b=document.getElementById('gym-vol-badge');if(t>0){b.textContent='Vol: '+t.toLocaleString()+' kg';b.style.display='inline-flex';}else b.style.display='none';}
+
+function renderEx(){
+  document.getElementById('gym-ex-list').innerHTML=GYMEX.map(e=>`
+    <div class="ex-row">
+      <select class="form-control" onchange="setEx('${e.id}','exercise',this.value)">${EX_LIST.map(x=>`<option${x===e.exercise?' selected':''}>${x}</option>`).join('')}</select>
+      <input type="number" class="form-control" value="${e.sets}" placeholder="4" min="0" oninput="setEx('${e.id}','sets',this.value)">
+      <input type="number" class="form-control" value="${e.reps}" placeholder="6" min="0" oninput="setEx('${e.id}','reps',this.value)">
+      <input type="number" class="form-control" value="${e.weight}" placeholder="kg" step="0.5" min="0" oninput="setEx('${e.id}','weight',this.value)">
+      <div id="ev-${e.id}" style="font-weight:700;color:var(--purple);font-size:12px;text-align:center">—</div>
+      <button onclick="removeEx('${e.id}')" style="width:28px;height:28px;border-radius:7px;background:rgba(239,68,68,.12);border:none;color:var(--red);cursor:pointer;font-size:13px">✕</button>
+    </div>`).join('');
+  GYMEX.forEach(e=>updExVol(e.id));
+  updVolBadge();
+}
+
+function saveGym(){
+  const aid=document.getElementById('gym-athlete').value;
+  const ath=DB.athletes.find(a=>a.id==aid);
+  if(!ath){toast('Select an athlete','error');return;}
+  DB.gymLogs.push({
+    id:uid(),date:document.getElementById('gym-date').value||today(),
+    athId:ath.id,athName:ath.name,pos:ath.pos,
+    type:document.getElementById('gym-type').value,
+    rpe:Number(document.getElementById('gym-rpe').value)||null,
+    read:Number(document.getElementById('gym-read').value)||null,
+    notes:document.getElementById('gym-notes').value,
+    exercises:GYMEX.map(e=>({...e}))
+  });
+  saveDB();toast('Gym session saved for '+ath.name);clearGym();renderGymLog();
+}
+
+function clearGym(){
+  document.getElementById('gym-date').value=today();
+  document.getElementById('gym-athlete').value='';
+  document.getElementById('gym-rpe').value='';
+  document.getElementById('gym-read').value='';
+  document.getElementById('gym-notes').value='';
+  GYMEX=[newEx()];renderEx();
+}
+
+function renderGymLog(){
+  const s=(document.getElementById('gym-search').value||'').toLowerCase();
+  const logs=[...DB.gymLogs].filter(g=>g.athName.toLowerCase().includes(s)).sort((a,b)=>b.date.localeCompare(a.date));
+  document.getElementById('gym-log-title').textContent='📋 Gym Log ('+DB.gymLogs.length+')';
+  const tb=document.getElementById('gym-tbody');
+  tb.innerHTML=logs.length?logs.map(g=>{const vol=sVol(g);const prev=g.exercises.slice(0,2).map(e=>`<div style="font-size:11px;color:var(--txt2)">${e.exercise}: ${e.sets}×${e.reps} @ ${e.weight}kg</div>`).join('')+(g.exercises.length>2?`<div style="font-size:10px;color:var(--txt3)">+${g.exercises.length-2} more</div>`:'');return `<tr><td style="color:var(--txt3);font-size:11px;white-space:nowrap">${g.date}</td><td>${chip(g.athName,g.pos)}</td><td><span class="badge b-purple">${g.type}</span></td><td>${prev}</td><td style="font-weight:700;color:var(--purple)">${vol.toLocaleString()} kg</td><td style="font-weight:700;color:${rpc(g.rpe)}">${g.rpe||'—'}/10</td><td style="font-weight:700;color:${g.read>=7?'var(--green)':g.read>=5?'var(--yellow)':'var(--red)'}">${g.read||'—'}/10</td><td style="font-size:11px;color:var(--txt2)">${g.notes||'—'}</td></tr>`;}).join(''):'<tr><td colspan="8" class="empty"><div class="empty-icon">🏋️</div>No gym sessions yet</td></tr>';
+}
+
+// SQUAD
+function addAthlete(){
+  const name=document.getElementById('sq-name').value.trim();
+  if(!name){toast('Enter athlete name','error');return;}
+  if(DB.athletes.length>=50){toast('Squad limit reached (50)','error');return;}
+  DB.athletes.push({id:Date.now(),name,pos:document.getElementById('sq-pos').value,num:Number(document.getElementById('sq-num').value)||DB.athletes.length+1});
+  saveDB();refreshDropdowns();renderSquad();toast(name+' added');
+  document.getElementById('sq-name').value='';document.getElementById('sq-num').value='';
+}
+
+function removeAthlete(id){
+  const a=DB.athletes.find(x=>x.id===id);
+  if(!a||!confirm('Remove '+a.name+'?'))return;
+  DB.athletes=DB.athletes.filter(x=>x.id!==id);
+  saveDB();refreshDropdowns();renderSquad();toast(a.name+' removed','error');
+}
+
+function setSqF(f,btn){SQF=f;document.querySelectorAll('#page-squad .ftab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderSquad();}
+
+function renderSquad(){
+  const s=(document.getElementById('sq-search').value||'').toLowerCase();
+  const list=DB.athletes.filter(a=>SQF==='All'||a.pos===SQF).filter(a=>a.name.toLowerCase().includes(s)).sort((a,b)=>a.num-b.num);
+  document.getElementById('sq-title').textContent='Squad ('+list.length+')';
+  document.getElementById('sq-cnt-badge').textContent=DB.athletes.length+' / 50';
+  const grid=document.getElementById('sq-grid');
+  grid.innerHTML=list.length?list.map(a=>{const c=pc(a.pos);const gc=DB.gpsLogs.filter(g=>g.athId===a.id).length;const gyc=DB.gymLogs.filter(g=>g.athId===a.id).length;return `<div class="squad-card"><button class="remove-btn" onclick="removeAthlete(${a.id})">✕</button><div class="squad-av" style="background:${c}22;color:${c}">${ini(a.name)}</div><div style="font-weight:700;font-size:13px;margin-bottom:2px">${a.name}</div><div style="font-size:10px;color:var(--txt3);margin-bottom:8px">#${a.num}</div><span style="background:${c}22;color:${c};border:1px solid ${c}44;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700">${a.pos}</span><div style="margin-top:8px;font-size:10px;color:var(--txt3)">🛰 ${gc} GPS &nbsp; 🏋️ ${gyc} Gym</div></div>`;}).join(''):'<div class="empty"><div class="empty-icon">👥</div>No athletes match</div>';
+}
+
+// ANALYTICS
+function renderAnalytics(){
+  const sid=document.getElementById('an-ath').value;
+  const gps=DB.gpsLogs.filter(g=>!sid||String(g.athId)===sid);
+  const gym=DB.gymLogs.filter(g=>!sid||String(g.athId)===sid);
+
+  const setM=(id,v,d=1)=>{document.getElementById(id).textContent=v!==null?fn(v,d):'—';};
+  setM('an-avg-d',avg(gps,'dist'));setM('an-max-d',peak(gps,'dist'));
+  setM('an-avg-s',avg(gps,'spd'));setM('an-max-s',peak(gps,'spd'));
+  setM('an-avg-sp',avg(gps,'spr'),0);
+  const ah=avg(gps,'hsr');document.getElementById('an-avg-h').textContent=ah!==null?fn(ah,0):'—';
+  document.getElementById('an-gps-cnt').textContent=gps.length+' sessions';
+
+  const zp=document.getElementById('an-zones');
+  const ZS=[{k:'z1',l:'Z1 (<60%)',c:'var(--blue)'},{k:'z2',l:'Z2 (60–70%)',c:'var(--cyan)'},{k:'z3',l:'Z3 (70–80%)',c:'var(--green)'},{k:'z4',l:'Z4 (80–90%)',c:'var(--yellow)'},{k:'z5',l:'Z5 (>90%)',c:'var(--red)'}];
+  zp.innerHTML=gps.length?ZS.map(z=>{const a=gps.reduce((s,g)=>s+Number(g[z.k]||0),0)/gps.length;return `<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="color:${z.c};font-weight:700">${z.l}</span><span style="font-weight:800;color:${z.c}">${a.toFixed(1)}%</span></div><div class="bar-wrap" style="height:9px;border-radius:4px"><div class="bar-fill" style="width:${Math.min(100,a)}%;background:${z.c}"></div></div></div>`;}).join(''):'<div class="empty"><div class="empty-icon">❤️</div>No GPS data yet</div>';
+
+  document.getElementById('an-gym-cnt').textContent=gym.length+' sessions';
+  const gvols=gym.map(g=>({date:g.date,vol:sVol(g)})).sort((a,b)=>a.date.localeCompare(b.date));
+  const gc=document.getElementById('an-gym-chart');
+  if(!gvols.length){gc.innerHTML='<div class="empty" style="width:100%"><div class="empty-icon">🏋️</div>No gym data yet</div>';document.getElementById('an-gym-avg').textContent='—';document.getElementById('an-gym-pk').textContent='—';}
+  else{const mv=Math.max(...gvols.map(g=>g.vol),1);gc.innerHTML=gvols.slice(-14).map(g=>`<div class="chart-col" title="${g.date}: ${g.vol.toLocaleString()} kg"><div class="chart-bar-area"><div class="chart-bar" style="height:${Math.max((g.vol/mv)*100,2)}%;background:linear-gradient(to top,var(--purple),#a78bfa)"></div></div><div class="chart-lbl">${g.date.slice(5)}</div></div>`).join('');const av2=gvols.reduce((s,g)=>s+g.vol,0)/gvols.length;document.getElementById('an-gym-avg').textContent=Math.round(av2).toLocaleString()+' kg';document.getElementById('an-gym-pk').textContent=Math.max(...gvols.map(g=>g.vol)).toLocaleString()+' kg';}
+
+  const ap=document.getElementById('an-accel');
+  if(!gps.length){ap.innerHTML='<div class="empty"><div class="empty-icon">⚡</div>No GPS data yet</div>';}
+  else{const aa=avg(gps,'acc'),ad=avg(gps,'dec'),mx=Math.max(aa||0,ad||0,1);ap.innerHTML=`<div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px"><span style="color:var(--yellow);font-weight:700">⬆️ Avg Accelerations</span><span style="font-weight:800;color:var(--yellow)">${fn(aa,0)}</span></div><div class="bar-wrap" style="height:9px"><div class="bar-fill" style="width:${Math.min(100,(aa/mx)*100)}%;background:var(--yellow)"></div></div></div><div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px"><span style="color:var(--cyan);font-weight:700">⬇️ Avg Decelerations</span><span style="font-weight:800;color:var(--cyan)">${fn(ad,0)}</span></div><div class="bar-wrap" style="height:9px"><div class="bar-fill" style="width:${Math.min(100,(ad/mx)*100)}%;background:var(--cyan)"></div></div></div><div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px"><div style="background:var(--bg3);border-radius:9px;padding:11px;text-align:center"><div style="font-size:9px;color:var(--txt3);text-transform:uppercase;margin-bottom:3px">Peak Accels</div><div style="font-size:18px;font-weight:800;color:var(--yellow)">${fn(peak(gps,'acc'),0)}</div></div><div style="background:var(--bg3);border-radius:9px;padding:11px;text-align:center"><div style="font-size:9px;color:var(--txt3);text-transform:uppercase;margin-bottom:3px">Peak Decels</div><div style="font-size:18px;font-weight:800;color:var(--cyan)">${fn(peak(gps,'dec'),0)}</div></div></div>`;}
+
+  const pp=document.getElementById('an-pos');
+  const pd=['GK','DF','MF','FW'].map(p=>({p,logs:DB.gpsLogs.filter(g=>g.pos===p)}));
+  const hp=pd.some(d=>d.logs.length>0);
+  if(!hp){pp.innerHTML='<div class="empty"><div class="empty-icon">📊</div>No GPS data yet</div>';}
+  else{const mx2=Math.max(...pd.map(d=>d.logs.length?avg(d.logs,'dist'):0),0.1);pp.innerHTML=pd.map(d=>{const a2=d.logs.length?avg(d.logs,'dist'):null;const c=pc(d.p);return `<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="color:${c};font-weight:700">${d.p} <span style="color:var(--txt3);font-size:10px">(${d.logs.length})</span></span><span style="font-weight:800;color:${c}">${a2!==null?fn(a2)+' km':'—'}</span></div><div class="bar-wrap" style="height:9px"><div class="bar-fill" style="width:${a2!==null?Math.min(100,(a2/mx2)*100):0}%;background:${c}"></div></div></div>`;}).join('');}
+
+  const lb=document.getElementById('an-lb');
+  const ranked=DB.athletes.map(a=>{const logs=DB.gpsLogs.filter(g=>g.athId===a.id);if(!logs.length)return null;return{a,logs,avgD:avg(logs,'dist'),avgS:avg(logs,'spd'),avgSp:avg(logs,'spr'),avgH:avg(logs,'hsr')};}).filter(Boolean).sort((a,b)=>b.avgD-a.avgD);
+  lb.innerHTML=ranked.length?ranked.map((r,i)=>`<tr><td style="font-size:15px;font-weight:800;color:${i===0?'var(--yellow)':i===1?'var(--txt2)':i===2?'#cd7f32':'var(--txt3)'}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</td><td>${chip(r.a.name,r.a.pos)}</td><td>${posBadge(r.a.pos)}</td><td style="color:var(--txt2)">${r.logs.length}</td><td style="font-weight:700;color:var(--cyan)">${fn(r.avgD)} km</td><td style="font-weight:700;color:var(--yellow)">${fn(r.avgS)} km/h</td><td style="font-weight:700;color:var(--red)">${fn(r.avgSp,0)}</td><td style="font-weight:700;color:var(--purple)">${fn(r.avgH,0)} m</td></tr>`).join(''):'<tr><td colspan="8" class="empty"><div class="empty-icon">🏆</div>No GPS data yet</td></tr>';
+}
+
+// INIT
+document.addEventListener('DOMContentLoaded',()=>{
+  loadDB();
+  refreshDropdowns();
+  renderDash();
+  renderSquad();
+  renderGPSLog();
+  renderGymLog();
+  GYMEX=[newEx()];renderEx();
+  document.getElementById('gps-date').value=today();
+  document.getElementById('gym-date').value=today();
+});
+</script>
+</body>
+</html>
